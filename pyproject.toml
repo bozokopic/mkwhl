@@ -1,6 +1,6 @@
 [project]
 name = "mkwhl"
-version = "0.2.2"
+version = "0.2.3"
 description = "Python wheel creation utility"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -11,6 +11,10 @@ dependencies = [
 ]
 authors = [
     {name = "Bozo Kopic", email = "bozo@kopic.xyz"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
 ]
 
 [project.scripts]

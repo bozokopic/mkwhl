@@ -114,7 +114,7 @@ def get_wheel_name(name: str,
     and version should be in canonical form (see `parse_version`).
 
     """
-    wheel_name = f"{name}-{version}"
+    wheel_name = f"{name.replace('-', '_')}-{version}"
 
     if build_tag is not None:
         wheel_name += f"-{build_tag}"
@@ -132,4 +132,4 @@ def get_dist_info_name(name: str,
     and version should be in canonical form (see `parse_version`).
 
     """
-    return f"{name}-{version}.dist-info"
+    return f"{name.replace('-', '_')}-{version}.dist-info"

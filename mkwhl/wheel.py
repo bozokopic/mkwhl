@@ -39,7 +39,7 @@ def create_wheel(src_dir: Path,
                  python_tag: str = 'py3',
                  abi_tag: str = 'none',
                  platform_tag: str = 'any',
-                 is_purelib: bool = True,
+                 is_purelib: bool = True
                  ) -> str:
     """Create wheel and return wheel name
 
