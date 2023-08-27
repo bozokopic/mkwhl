@@ -78,6 +78,9 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="source exclude pattern - can be provided multiple times "
              "(default '**/__pycache__/**/*')")
     parser.add_argument(
+        '--build-tag', metavar='N', type=int, default=None,
+        help="optional build tag")
+    parser.add_argument(
         '--python-tag', metavar='TAG', default='py3',
         help="python tag (default 'py3')")
     parser.add_argument(
@@ -89,9 +92,6 @@ def create_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         '--not-purelib', action='store_true',
         help="is not purelib")
-    parser.add_argument(
-        '--build', metavar='N', type=int, default=None,
-        help="optional build number")
     parser.add_argument(
         '--quiet', action='store_true',
         help="skip outputing wheel name to stdout")
@@ -128,11 +128,11 @@ def main():
                               else args.src_include),
         src_exclude_patterns=(args.src_exclude[1:] if len(args.src_exclude) > 1
                               else args.src_exclude),
+        build_tag=args.build_tag,
         python_tag=args.python_tag,
         abi_tag=args.abi_tag,
         platform_tag=args.platform_tag,
-        is_purelib=not args.not_purelib,
-        build=args.build)
+        is_purelib=not args.not_purelib)
 
     if not args.quiet:
         print(wheel_name)

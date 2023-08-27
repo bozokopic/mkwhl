@@ -103,7 +103,7 @@ def parse_tags(python_tag: str,
 
 def get_wheel_name(name: str,
                    version: str,
-                   build: int | None,
+                   build_tag: int | None,
                    python_tag: str,
                    abi_tag: str,
                    platform_tag: str
@@ -116,8 +116,8 @@ def get_wheel_name(name: str,
     """
     wheel_name = f"{name}-{version}"
 
-    if build is not None:
-        wheel_name += f"-{build}"
+    if build_tag is not None:
+        wheel_name += f"-{build_tag}"
 
     wheel_name += f"-{python_tag}-{abi_tag}-{platform_tag}.whl"
     return wheel_name

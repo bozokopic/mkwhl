@@ -146,11 +146,11 @@ def get_metadata_props(project_conf: dict[str, typing.Any],
                                 provides_extras=provides_extras)
 
 
-def get_wheel_props(python_tag: str,
+def get_wheel_props(build_tag: int | None,
+                    python_tag: str,
                     abi_tag: str,
                     platform_tag: str,
-                    is_purelib: bool,
-                    build: int | None
+                    is_purelib: bool
                     ) -> common.WheelProps:
     """Create wheel properties"""
     tags = list(common.parse_tags(python_tag=python_tag,
@@ -159,4 +159,4 @@ def get_wheel_props(python_tag: str,
 
     return common.WheelProps(is_purelib=is_purelib,
                              tags=tags,
-                             build=build)
+                             build=build_tag)

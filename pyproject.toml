@@ -1,6 +1,6 @@
 [project]
 name = "mkwhl"
-version = "0.2.1"
+version = "0.2.2"
 description = "Python wheel creation utility"
 readme = "README.rst"
 requires-python = ">=3.10"

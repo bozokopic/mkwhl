@@ -60,11 +60,11 @@ def _build_wheel(build_dir: Path,
                                          ['**/*'])
     src_exclude_patterns = tool_conf.get('src-exclude-patterns',
                                          ['**/__pycache__/**/*'])
+    build_tag = tool_conf.get('build-tag')
     python_tag = tool_conf.get('python-tag', 'py3')
     abi_tag = tool_conf.get('abi-tag', 'none')
     platform_tag = tool_conf.get('platform-tag', 'any')
     is_purelib = tool_conf.get('is-purelib', True)
-    build = tool_conf.get('build')
 
     if src_dir is None:
         for i in [Path('src_py'), Path('src')]:
@@ -85,11 +85,11 @@ def _build_wheel(build_dir: Path,
                         editable=editable,
                         src_include_patterns=src_include_patterns,
                         src_exclude_patterns=src_exclude_patterns,
+                        build_tag=build_tag,
                         python_tag=python_tag,
                         abi_tag=abi_tag,
                         platform_tag=platform_tag,
-                        is_purelib=is_purelib,
-                        build=build)
+                        is_purelib=is_purelib)
 
 
 def _get_requires() -> list[str]:
