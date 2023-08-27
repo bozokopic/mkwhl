@@ -1,3 +1,5 @@
+"""Create .dist-info properties based on configuration and arguments"""
+
 from pathlib import Path
 import collections
 import typing
@@ -8,7 +10,13 @@ from mkwhl import common
 def get_entry_points_props(project_conf: dict[str, typing.Any],
                            scripts: dict[str, str] | None,
                            gui_scripts: dict[str, str] | None
-                           ) -> common.MetadataProps:
+                           ) -> common.EntryPointsProps:
+    """Create entry point properties
+
+    If argument `scripts` or `gui_scripts` is ``None``, associated resulting
+    property is set based on project configuration.
+
+    """
     if scripts is None:
         scripts = project_conf.get('scripts', {})
 
@@ -34,6 +42,12 @@ def get_metadata_props(project_conf: dict[str, typing.Any],
                        dependencies: list[str] | None,
                        optional_dependencies: dict[str, list[str]] | None,
                        ) -> common.MetadataProps:
+    """Create metadata properties
+
+    If any of the arguments (except `project_conf`) is ``None``, associated
+    resulting property is set based on project configuration.
+
+    """
     if name is None:
         name = project_conf.get('name')
     if name is None:
@@ -138,6 +152,7 @@ def get_wheel_props(python_tag: str,
                     is_purelib: bool,
                     build: int | None
                     ) -> common.WheelProps:
+    """Create wheel properties"""
     tags = list(common.parse_tags(python_tag=python_tag,
                                   abi_tag=abi_tag,
                                   platform_tag=platform_tag))

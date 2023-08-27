@@ -1,23 +1,33 @@
+"""Shared structures and functions"""
+
 from pathlib import Path
 import base64
 import datetime
 import re
+import sys
 import typing
 
 import packaging.tags
 import packaging.version
-import tomli
+
+if sys.version_info[:2] >= (3, 11):
+    import tomllib as toml
+else:
+    import tomli as toml
 
 
 now: datetime.datetime = datetime.datetime.now()
+"""Time instance of module loading"""
 
 
 class EntryPointsProps(typing.NamedTuple):
+    """Entry point properties"""
     console_scripts: dict[str, str]
     gui_scripts: dict[str, str]
 
 
 class MetadataProps(typing.NamedTuple):
+    """Metadata properties"""
     name: str
     version: str
     platforms: typing.Iterable[str]
@@ -42,31 +52,38 @@ class MetadataProps(typing.NamedTuple):
 
 
 class WheelProps(typing.NamedTuple):
+    """Wheel properties"""
     is_purelib: bool
     tags: typing.Iterable[str]
     build: int | None
 
 
 class WheelRecord(typing.NamedTuple):
+    """Single wheel record"""
     path: Path
     sha256: bytes | None
     size: int | None
 
 
-def get_conf(path: Path = Path('pyproject.toml')) -> dict[str, typing.Any]:
+def get_conf(path: Path = Path('pyproject.toml')
+             ) -> dict[str, typing.Any]:
+    """Get TOML configuration"""
     conf_str = path.read_text()
-    return tomli.loads(conf_str)
+    return toml.loads(conf_str)
 
 
 def urlsafe_b64encode_nopad(data: bytes) -> str:
+    """Record hash encoding"""
     return base64.urlsafe_b64encode(data).rstrip(b'=').decode('utf-8')
 
 
 def normalize_name(name: str) -> str:
+    """Normalize project name"""
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
 def parse_version(version: str) -> str:
+    """Parse and return canonical version identifier"""
     if version.endswith('dev'):
         version += now.strftime("%Y%m%d")
 
@@ -77,6 +94,7 @@ def parse_tags(python_tag: str,
                abi_tag: str,
                platform_tag: str
                ) -> typing.Iterable[str]:
+    """Create all tags from possibly compressed tag segments"""
     tags = packaging.tags.parse_tag(f"{python_tag}-{abi_tag}-{platform_tag}")
 
     for tag in tags:
@@ -90,6 +108,12 @@ def get_wheel_name(name: str,
                    abi_tag: str,
                    platform_tag: str
                    ) -> str:
+    """Get wheel name
+
+    Provided name should be previously normalized (see `normalize_name`)
+    and version should be in canonical form (see `parse_version`).
+
+    """
     wheel_name = f"{name}-{version}"
 
     if build is not None:
@@ -102,4 +126,10 @@ def get_wheel_name(name: str,
 def get_dist_info_name(name: str,
                        version: str
                        ) -> str:
+    """Get full name of .dist-info folder
+
+    Provided name should be previously normalized (see `normalize_name`)
+    and version should be in canonical form (see `parse_version`).
+
+    """
     return f"{name}-{version}.dist-info"

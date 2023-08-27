@@ -1,36 +1,50 @@
+"""Build backend implementing PEP517 and PEP660"""
+
 from pathlib import Path
+import typing
 
 from mkwhl import common
 from mkwhl.wheel import create_wheel
 
 
 class UnsupportedOperation(Exception):
-    pass
+    """Unsupported operation (PEP517)"""
 
 
-def build_wheel(wheel_directory,
-                config_settings=None,
-                metadata_directory=None):
+def build_wheel(wheel_directory: str,
+                config_settings: typing.Any = None,
+                metadata_directory: str | None = None
+                ) -> str:
+    """Build wheel (PEP517)"""
     return _build_wheel(build_dir=Path(wheel_directory),
                         editable=False)
 
 
-def build_editable(wheel_directory,
-                   config_settings=None,
-                   metadata_directory=None):
+def build_editable(wheel_directory: str,
+                   config_settings: typing.Any = None,
+                   metadata_directory: str | None = None
+                   ) -> str:
+    """Build editable wheel (PEP660)"""
     return _build_wheel(build_dir=Path(wheel_directory),
                         editable=True)
 
 
-def build_sdist(sdist_directory, config_settings=None):
+def build_sdist(sdist_directory: str,
+                config_settings: typing.Any = None
+                ) -> str:
+    """Build source distribution (PEP517)"""
     raise UnsupportedOperation()
 
 
-def get_requires_for_build_wheel(config_settings=None):
+def get_requires_for_build_wheel(config_settings: typing.Any = None
+                                 ) -> list[str]:
+    """Get build wheel requirements (PEP517)"""
     return _get_requires()
 
 
-def get_requires_for_build_editable(config_settings=None):
+def get_requires_for_build_editable(config_settings: typing.Any = None
+                                    ) -> list[str]:
+    """Get build editable wheel requirements (PEP660)"""
     return _get_requires()
 
 
@@ -78,7 +92,7 @@ def _build_wheel(build_dir: Path,
                         build=build)
 
 
-def _get_requires():
+def _get_requires() -> list[str]:
     conf = common.get_conf()
     project_conf = conf.get('project', {})
 

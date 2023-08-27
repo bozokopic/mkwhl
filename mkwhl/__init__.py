@@ -1,3 +1,5 @@
+"""Wheel creation utility"""
+
 from mkwhl.build import (UnsupportedOperation,
                          build_wheel,
                          build_editable,

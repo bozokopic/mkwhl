@@ -1,3 +1,5 @@
+"""Create wheel API"""
+
 from pathlib import Path
 import collections
 import hashlib
@@ -39,6 +41,33 @@ def create_wheel(src_dir: Path,
                  is_purelib: bool = True,
                  build: int | None = None
                  ) -> str:
+    """Create wheel and return wheel name
+
+    Argument `src_dir` is path to source root directory.
+
+    Argument `build_dir` is path to directory where resulting wheel will be
+    created.
+
+    If one of arguments `name`, `version`, `description`, `readme_path`,
+    `requires_python`, `license`, `authors`, `maintainers`, `keywords`,
+    `classifiers`, `urls`, `scripts`, `gui_scripts`, `dependencies` or
+    `optional_dependencies` is ``None``, associated resulting property is set
+    based on project configuration read from pyproject.
+
+    Arguments `authors` and `maintainers` are structured as list of tuples
+    where first tuple element represents name and second tuple element
+    represents email.
+
+    If `conf_path` is ``None``, resulting wheel will be created based only on
+    provided arguments without parsing of pyproject configuration.
+
+    Arguments `src_include_patterns` and `src_exclude_patterns` provide
+    list of strings used as `pathlib.Path.glob` patterns applied to `src_dir`.
+    Include patterns specify all files that will be included in resulting
+    wheel. All files specified by exclude patterns will not be included in
+    resulting wheel, even if same file is specified by include pattern.
+
+    """
     conf = common.get_conf(conf_path) if conf_path else {}
     project_conf = conf.get('project') if conf else {}
 

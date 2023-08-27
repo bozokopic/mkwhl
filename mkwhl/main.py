@@ -1,3 +1,5 @@
+"""Command line interface"""
+
 from pathlib import Path
 import argparse
 import sys
@@ -6,6 +8,7 @@ from mkwhl.wheel import create_wheel
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
+    """Create argument parser"""
     parser = argparse.ArgumentParser(
         description="Create Python wheel")
     parser.add_argument(
@@ -89,14 +92,18 @@ def create_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         '--build', metavar='N', type=int, default=None,
         help="optional build number")
+    parser.add_argument(
+        '--quiet', action='store_true',
+        help="skip outputing wheel name to stdout")
     return parser
 
 
 def main():
+    """Main entry point"""
     parser = create_argument_parser()
     args = parser.parse_args()
 
-    create_wheel(
+    wheel_name = create_wheel(
         src_dir=args.src_dir,
         build_dir=args.build_dir,
         name=args.name,
@@ -126,6 +133,9 @@ def main():
         platform_tag=args.platform_tag,
         is_purelib=not args.not_purelib,
         build=args.build)
+
+    if not args.quiet:
+        print(wheel_name)
 
 
 if __name__ == '__main__':

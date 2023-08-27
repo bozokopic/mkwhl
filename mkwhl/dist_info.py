@@ -1,11 +1,13 @@
+"""Formating of .dist-info files"""
+
 import io
 import typing
 
 from mkwhl import common
 
 
-def get_entry_points_txt(props: common.EntryPointsProps
-                         ) -> str:
+def get_entry_points_txt(props: common.EntryPointsProps) -> str:
+    """Create entry_points.txt file content"""
     stream = io.StringIO()
 
     if props.console_scripts:
@@ -24,6 +26,7 @@ def get_entry_points_txt(props: common.EntryPointsProps
 
 
 def get_METADATA(props: common.MetadataProps) -> str:
+    """Create METADATA file content"""
     stream = io.StringIO()
 
     stream.write("Metadata-Version: 2.1\n")
@@ -92,6 +95,7 @@ def get_METADATA(props: common.MetadataProps) -> str:
 
 
 def get_WHEEL(props: common.WheelProps) -> str:
+    """Create WHEEL file content"""
     stream = io.StringIO()
 
     stream.write("Wheel-Version: 1.0\n")
@@ -110,6 +114,7 @@ def get_WHEEL(props: common.WheelProps) -> str:
 
 
 def get_RECORD(records: typing.Iterable[common.WheelRecord]) -> str:
+    """Create RECORD file content"""
     stream = io.StringIO()
 
     for record in records:

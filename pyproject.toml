@@ -1,13 +1,13 @@
 [project]
 name = "mkwhl"
-version = "0.2.0"
+version = "0.2.1"
 description = "Python wheel creation utility"
 readme = "README.rst"
 requires-python = ">=3.10"
 license = {text = "GPLv3"}
 dependencies = [
     "packaging >=23.1",
-    "tomli ~=2.0.1",
+    "tomli ~=2.0.1; python_version<'3.11'",
 ]
 authors = [
     {name = "Bozo Kopic", email = "bozo@kopic.xyz"}
@@ -24,7 +24,7 @@ build-backend = "mkwhl"
 backend-path = ["."]
 requires = [
     "packaging >=23.1",
-    "tomli ~=2.0.1",
+    "tomli ~=2.0.1; python_version<'3.11'",
 ]
 
 [tool.mkwhl]
