@@ -2,4 +2,4 @@
 
 cd $(dirname -- "$0")
 
-exec ${PYTHON:-python3} -m mkwhl mkwhl
+exec ${PYTHON:-python3} -m mkwhl --src-include 'mkwhl/**/*' "$@"

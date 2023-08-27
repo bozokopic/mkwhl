@@ -12,6 +12,11 @@ import tomli
 now: datetime.datetime = datetime.datetime.now()
 
 
+class EntryPointsProps(typing.NamedTuple):
+    console_scripts: dict[str, str]
+    gui_scripts: dict[str, str]
+
+
 class MetadataProps(typing.NamedTuple):
     name: str
     version: str
@@ -76,3 +81,25 @@ def parse_tags(python_tag: str,
 
     for tag in tags:
         yield str(tag)
+
+
+def get_wheel_name(name: str,
+                   version: str,
+                   build: int | None,
+                   python_tag: str,
+                   abi_tag: str,
+                   platform_tag: str
+                   ) -> str:
+    wheel_name = f"{name}-{version}"
+
+    if build is not None:
+        wheel_name += f"-{build}"
+
+    wheel_name += f"-{python_tag}-{abi_tag}-{platform_tag}.whl"
+    return wheel_name
+
+
+def get_dist_info_name(name: str,
+                       version: str
+                       ) -> str:
+    return f"{name}-{version}.dist-info"

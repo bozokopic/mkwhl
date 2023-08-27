@@ -40,29 +40,37 @@ def _build_wheel(build_dir: Path,
     conf = common.get_conf()
     tool_conf = conf.get('tool', {}).get('mkwhl', {})
 
-    src_paths = tool_conf.get('src-paths')
+    src_dir = tool_conf.get('src-dir')
     license_path = tool_conf.get('license-path')
-    python_tag = tool_conf.get('python-tag')
-    abi_tag = tool_conf.get('abi-tag')
-    platform_tag = tool_conf.get('platform-tag')
-    is_purelib = tool_conf.get('is-purelib')
+    src_include_patterns = tool_conf.get('src-include-patterns',
+                                         ['**/*'])
+    src_exclude_patterns = tool_conf.get('src-exclude-patterns',
+                                         ['**/__pycache__/**/*'])
+    python_tag = tool_conf.get('python-tag', 'py3')
+    abi_tag = tool_conf.get('abi-tag', 'none')
+    platform_tag = tool_conf.get('platform-tag', 'any')
+    is_purelib = tool_conf.get('is-purelib', True)
     build = tool_conf.get('build')
 
-    if src_paths is not None:
-        src_paths = {Path(k): v for k, v in src_paths.items()}
-
-    else:
-        for src_dir in [Path('src_py'), Path('src')]:
-            if src_dir.is_dir():
-                src_paths = {src_dir: ['.']}
+    if src_dir is None:
+        for i in [Path('src_py'), Path('src')]:
+            if i.is_dir():
+                src_dir = i
                 break
         else:
             raise Exception('cound not detect src dir')
+    else:
+        src_dir = Path(src_dir)
 
-    return create_wheel(src_paths=src_paths,
+    if license_path is not None:
+        license_path = Path(license_path)
+
+    return create_wheel(src_dir=src_dir,
                         build_dir=build_dir,
                         license_path=license_path,
                         editable=editable,
+                        src_include_patterns=src_include_patterns,
+                        src_exclude_patterns=src_exclude_patterns,
                         python_tag=python_tag,
                         abi_tag=abi_tag,
                         platform_tag=platform_tag,
