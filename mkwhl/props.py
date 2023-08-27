@@ -114,14 +114,15 @@ def get_metadata_props(project_conf: dict[str, typing.Any],
     if dependencies is None:
         dependencies = project_conf.get('dependencies', [])
 
-    provides_extras = collections.deque()
-    requires_externals = collections.deque()
     if optional_dependencies is None:
         optional_dependencies = project_conf.get('optional-dependencies', {})
+
+    dependencies = collections.deque(dependencies)
+    provides_extras = collections.deque()
     for k, v in optional_dependencies.items():
         provides_extras.append(k)
         for i in v:
-            requires_externals.append(f"{i}; extra == '{k}'")
+            dependencies.append(f"{i} ; extra == '{k}'")
 
     return common.MetadataProps(name=name,
                                 version=version,
@@ -141,7 +142,7 @@ def get_metadata_props(project_conf: dict[str, typing.Any],
                                 classifiers=classifiers,
                                 requires_dists=dependencies,
                                 requires_python=requires_python,
-                                requires_externals=requires_externals,
+                                requires_externals=[],
                                 project_urls=urls,
                                 provides_extras=provides_extras)
 
