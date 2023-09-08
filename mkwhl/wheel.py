@@ -70,15 +70,17 @@ def create_wheel(src_dir: Path,
 
     """
     conf = common.get_conf(conf_path) if conf_path else {}
-    project_conf = conf.get('project') if conf else {}
+    project = (common.Project(conf=conf['project'],
+                              path=conf_path.parent)
+               if 'project' in conf else None)
 
     entry_points_props = props.get_entry_points_props(
-        project_conf=project_conf,
+        project=project,
         scripts=scripts,
         gui_scripts=gui_scripts)
 
     metadata_props = props.get_metadata_props(
-        project_conf=project_conf,
+        project=project,
         name=name,
         version=version,
         description=description,
@@ -99,10 +101,10 @@ def create_wheel(src_dir: Path,
                                         platform_tag=platform_tag,
                                         is_purelib=is_purelib)
 
-    if license_path is None:
-        license_path_str = project_conf.get('license', {}).get('file')
+    if license_path is None and project:
+        license_path_str = project.conf.get('license', {}).get('file')
         if license_path_str:
-            license_path = Path(license_path_str)
+            license_path = project.path / license_path_str
     if license_path is None:
         for i in [Path('LICENSE'), Path('LICENSE.txt')]:
             if i.exists():

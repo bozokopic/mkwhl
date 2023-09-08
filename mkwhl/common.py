@@ -65,6 +65,12 @@ class WheelRecord(typing.NamedTuple):
     size: int | None
 
 
+class Project(typing.NamedTuple):
+    """Project definition"""
+    conf: dict[str, typing.Any]
+    path: Path
+
+
 def get_conf(path: Path = Path('pyproject.toml')
              ) -> dict[str, typing.Any]:
     """Get TOML configuration"""

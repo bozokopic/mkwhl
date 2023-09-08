@@ -20,6 +20,10 @@ Functionality should not depend on specific project's repository layout.
 User is responsible for providing correct configuration/arguments
 (e.g. python/abi/platform tags) without additional "automatic" detection.
 
+Only responsibility of `mkwhl` is creation of wheels. Any kind of
+preprocessing, including compilation of native extensions, should be done
+prior to `mkwhl` execution.
+
 
 Requirements
 ------------
@@ -101,6 +105,12 @@ Wheel will be build based on pyproject.toml `project metadata`_ and additional
 
   Is purelib (see `binary distribution format`_). If not set, ``true`` is
   assumed.
+
+* `optional-dependencies` (list of strings)
+
+  List of strings used as keys in pyproject.toml
+  ``[project.optional-dependencies]``. These dependencies are required as part
+  of build virtual environment. If not set, ``['dev']`` is assumed.
 
 
 Python API

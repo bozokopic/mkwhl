@@ -1,6 +1,7 @@
 """Build backend implementing PEP517 and PEP660"""
 
 from pathlib import Path
+import collections
 import typing
 
 from mkwhl import common
@@ -95,6 +96,12 @@ def _build_wheel(build_dir: Path,
 def _get_requires() -> list[str]:
     conf = common.get_conf()
     project_conf = conf.get('project', {})
+    tool_conf = conf.get('tool', {}).get('mkwhl', {})
 
-    return [*project_conf.get('dependencies', []),
-            *project_conf.get('optional-dependencies', {}).get('dev', [])]
+    dependencies = collections.deque(project_conf.get('dependencies', []))
+
+    for i in tool_conf.get('optional-dependencies', ['dev']):
+        dependencies.extend(
+            project_conf.get('optional-dependencies', {}).get(i, []))
+
+    return list(dependencies)

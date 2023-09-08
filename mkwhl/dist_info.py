@@ -72,6 +72,9 @@ def get_METADATA(props: common.MetadataProps) -> str:
     for classifier in props.classifiers:
         stream.write(f"Classifier: {classifier}\n")
 
+    for provides_extra in props.provides_extras:
+        stream.write(f"Provides-Extra: {provides_extra}\n")
+
     for requires_dist in props.requires_dists:
         stream.write(f"Requires-Dist: {requires_dist}\n")
 
@@ -83,9 +86,6 @@ def get_METADATA(props: common.MetadataProps) -> str:
 
     for url_name, url_path in props.project_urls.items():
         stream.write(f"Project-URL: {url_name}, {url_path}\n")
-
-    for provides_extra in props.provides_extras:
-        stream.write(f"Provides-Extra: {provides_extra}\n")
 
     if props.description_path:
         description = props.description_path.read_text('utf-8')
