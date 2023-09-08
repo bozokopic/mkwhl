@@ -46,6 +46,16 @@ Usage::
 
     $ mkwhl --help
 
+`mkwhl` will create new wheel in ``--build-dir`` (defaults to ``build``)
+containing files from ``--src-dir`` (default to ``.``). Files in ``--src-dir``
+are selected based on ``--src-include`` and ``--src-exclude`` patterns
+used as `pathlib.Path.glob` arguments applied to ``--src-dir``
+(``--src-exclude`` patterns are prioritized over ``--src-include`` patterns).
+If ``--skip-conf`` is not set, project properties, which are not explicitly
+overridden by command line arguments, are read from ``--conf`` (defaults to
+``pyproject.toml``) as defined by `project metadata`_. When wheel is created,
+wheel name is printed to stdout (unless ``--quiet`` flag is set).
+
 
 `pyproject.toml` build backend
 ------------------------------
