@@ -139,3 +139,15 @@ def get_dist_info_name(name: str,
 
     """
     return f"{name.replace('-', '_')}-{version}.dist-info"
+
+
+def get_data_name(name: str,
+                  version: str
+                  ) -> str:
+    """Get full name of .data folder
+
+    Provided name should be previously normalized (see `normalize_name`)
+    and version should be in canonical form (see `parse_version`).
+
+    """
+    return f"{name.replace('-', '_')}-{version}.data"

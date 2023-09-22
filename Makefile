@@ -12,5 +12,8 @@ install:
 editable:
 	$(PYTHON) -m pip install -e .
 
+check:
+	$(PYTHON) -m flake8 mkwhl
+
 clean:
 	rm -rf build

@@ -35,6 +35,7 @@ def create_wheel(src_dir: Path,
                  editable: bool = False,
                  src_include_patterns: typing.Iterable[str] = ['**/*'],
                  src_exclude_patterns: typing.Iterable[str] = ['**/__pycache__/**/*'],  # NOQA
+                 data_dir: Path | None = None,
                  build_tag: int | None = None,
                  python_tag: str = 'py3',
                  abi_tag: str = 'none',
@@ -123,6 +124,10 @@ def create_wheel(src_dir: Path,
                                                version=metadata_props.version)
     dist_info_path = Path(dist_info_name)
 
+    data_name = common.get_data_name(name=metadata_props.name,
+                                     version=metadata_props.version)
+    data_path = Path(data_name)
+
     records = collections.deque()
     wheel_path.parent.mkdir(parents=True,
                             exist_ok=True)
@@ -141,6 +146,14 @@ def create_wheel(src_dir: Path,
                                     path=src_path.relative_to(src_dir),
                                     data=src_path.read_bytes())
                 records.append(record)
+
+            if data_dir:
+                for path in _get_data_paths(data_dir):
+                    record = _whl_write(
+                        whl=whl,
+                        path=data_path / 'data' / path.relative_to(data_dir),
+                        data=path.read_bytes())
+                    records.append(record)
 
         if license_path:
             record = _whl_write(whl=whl,
@@ -207,6 +220,15 @@ def _get_src_paths(src_dir: Path,
             continue
 
         yield src_path
+
+
+def _get_data_paths(data_dir: Path
+                    ) -> typing.Iterable[Path]:
+    for data_path in data_dir.glob('**/*'):
+        if data_path.is_dir():
+            continue
+
+        yield data_path
 
 
 def _get_editable_pth(src_dir: Path) -> str:

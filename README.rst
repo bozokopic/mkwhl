@@ -92,6 +92,10 @@ Wheel will be build based on pyproject.toml `project metadata`_ and additional
   wheel. This patterns take priority over `src-include-patterns`. If not set,
   ``['**/__pycache__/**/*']`` is assumed.
 
+* `data-dir` (string)
+
+  Optional data directory.
+
 * 'python-tag' (string)
 
   Python tag (see `binary distribution format`_). If not set, ``py3`` is
@@ -152,11 +156,12 @@ exposes single function::
                      editable: bool = False,
                      src_include_patterns: typing.Iterable[str] = ['**/*'],
                      src_exclude_patterns: typing.Iterable[str] = ['**/__pycache__/**/*'],
+                     data_dir: Path | None = None,
                      build_tag: int | None = None,
                      python_tag: str = 'py3',
                      abi_tag: str = 'none',
                      platform_tag: str = 'any',
-                     is_purelib: bool = True,
+                     is_purelib: bool = True
                      ) -> str:
         """Create wheel and return wheel name
 

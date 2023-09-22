@@ -105,6 +105,9 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help=f"source exclude pattern - can be provided multiple times "
              f"(default {repr(default_src_exclude)})")
     parser.add_argument(
+        '--data-dir', metavar='PATH', type=Path, default=None,
+        help="data directory")
+    parser.add_argument(
         '--build-tag', metavar='N', type=int, default=None,
         help="optional build tag")
     parser.add_argument(
@@ -209,6 +212,7 @@ def main():
         editable=False,
         src_include_patterns=src_include,
         src_exclude_patterns=src_exclude,
+        data_dir=args.data_dir,
         build_tag=args.build_tag,
         python_tag=args.python_tag,
         abi_tag=args.abi_tag,

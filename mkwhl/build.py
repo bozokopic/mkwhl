@@ -61,6 +61,7 @@ def _build_wheel(build_dir: Path,
                                          ['**/*'])
     src_exclude_patterns = tool_conf.get('src-exclude-patterns',
                                          ['**/__pycache__/**/*'])
+    data_dir = tool_conf.get('data-dir')
     build_tag = tool_conf.get('build-tag')
     python_tag = tool_conf.get('python-tag', 'py3')
     abi_tag = tool_conf.get('abi-tag', 'none')
@@ -80,12 +81,16 @@ def _build_wheel(build_dir: Path,
     if license_path is not None:
         license_path = Path(license_path)
 
+    if data_dir is not None:
+        data_dir = Path(data_dir)
+
     return create_wheel(src_dir=src_dir,
                         build_dir=build_dir,
                         license_path=license_path,
                         editable=editable,
                         src_include_patterns=src_include_patterns,
                         src_exclude_patterns=src_exclude_patterns,
+                        data_dir=data_dir,
                         build_tag=build_tag,
                         python_tag=python_tag,
                         abi_tag=abi_tag,
