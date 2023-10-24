@@ -105,8 +105,8 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help=f"source exclude pattern - can be provided multiple times "
              f"(default {repr(default_src_exclude)})")
     parser.add_argument(
-        '--data-dir', metavar='PATH', type=Path, default=None,
-        help="data directory")
+        '--data', metavar='SRC_PATH:DST_PATH', action='append',
+        help="data source:destination path - can be provided multiple times")
     parser.add_argument(
         '--build-tag', metavar='N', type=int, default=None,
         help="optional build tag")
@@ -189,6 +189,13 @@ def main():
                    if len(args.src_exclude) > len(default_src_exclude)
                    else args.src_exclude)
 
+    data_paths = []
+    for src_dst_path in (args.data or []):
+        src_path, dst_path = src_dst_path.split(':', 1)
+        if not src_path or not dst_path:
+            continue
+        data_paths.append((Path(src_path), Path(dst_path)))
+
     wheel_name = create_wheel(
         src_dir=args.src_dir,
         build_dir=args.build_dir,
@@ -212,7 +219,7 @@ def main():
         editable=False,
         src_include_patterns=src_include,
         src_exclude_patterns=src_exclude,
-        data_dir=args.data_dir,
+        data_paths=data_paths,
         build_tag=args.build_tag,
         python_tag=args.python_tag,
         abi_tag=args.abi_tag,

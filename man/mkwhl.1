@@ -1,0 +1,320 @@
+.Dd October 25, 2023
+.Dt MKWHL 1
+.Os
+
+.Sh NAME
+.Nm mkwhl
+.Nd python wheel creation utility
+
+.Sh SYNOPSIS
+.Nm
+.Op Fl \-abi-tag Ar TAG
+.Oo Fl \-author Ar NAME Oc Ns ...
+.Op Fl \-build-dir Ar PATH
+.Op Fl \-build-tag Ar N
+.Oo Fl \-classifier Ar CLASSIFIER Oc Ns ...
+.Op Fl \-conf Ar PATH
+.Oo Fl \-data Ar SRC_PATH:DST_PATH Oc Ns ...
+.Oo Fl \-dependency Ar NAME Oc Ns ...
+.Op Fl \-description Ar TEXT
+.Oo Fl \-gui-script Ar NAME=ENTRY Oc Ns ...
+.Op Fl \-help
+.Oo Fl \-keyword Ar KEYWORD Oc Ns ...
+.Op Fl \-license Ar NAME
+.Op Fl \-license-file Ar PATH
+.Oo Fl \-maintainer Ar NAME Oc Ns ...
+.Op Fl \-name Ar NAME
+.Op Fl \-not-purelib
+.Oo Fl \-optional-dependency Ar GROUP:NAME Oc Ns ...
+.Op Fl \-platform-tag Ar TAG
+.Op Fl \-python-tag Ar TAG
+.Op Fl \-quiet
+.Op Fl \-readme Ar PATH
+.Op Fl \-requires-python Ar VERSION
+.Oo Fl \-script Ar NAME=ENTRY Oc Ns ...
+.Op Fl \-skip-conf
+.Op Fl \-src-dir Ar PATH
+.Oo Fl \-src-exclude Ar PATTERN Oc Ns ...
+.Oo Fl \-src-include Ar PATTERN Oc Ns ...
+.Oo Fl \-url Ar NAME=URL Oc Ns ...
+.Op Fl \-version Ar VERSION
+
+.Sh DESCRIPTION
+.Nm
+will create new wheel in
+.Fl \-build-dir
+(defaults to
+.Pa build )
+containing files from
+.Fl \-src-dir
+(defaults to
+.Pa \&. ) .
+Files in
+.Fl \-src-dir
+are selected based on
+.Fl \-src-include
+and
+.Fl \-src-exclude
+patterns used as
+.Fn pathlib.Path.glob
+arguments applied to
+.Fl \-src-dir
+.Fl ( \-src-exclude
+patterns are prioritized over
+.Fl \-src-include
+patterns).
+If
+.Fl \-skip-conf
+is not set, project properties, which are not explicitly overridden by command
+line arguments, are read from
+.Fl \-conf
+(defaults to
+.Pa pyproject.toml )
+as defined by
+.Sy Project metadata
+(see
+.Sx SEE ALSO ) .
+When wheel is created, wheel name is printed to
+.Sy stdout
+(unless
+.Fl \-quiet
+flag is set).
+
+.Nm
+accepts following arguments:
+.Bl -tag -offset Ds
+
+.It Fl \-abi-tag Ar TAG
+ABI tag as specified by
+.Sy PyPA Platform compatibility tags
+(see
+.Sx SEE ALSO ) .
+If not provided, defaults to
+.Em none .
+
+.It Fl \-author Ar NAME
+Override authors from
+.Pa pyproject.toml .
+Author's name can be formatted as
+.Qq name
+or
+.Qq name Aq email .
+Multiple
+.Fl \-author
+flags are supported.
+
+.It Fl \-build-dir Ar PATH
+Path to directory where new wheel will be created.
+If not provided, defaults to
+.Pa build .
+
+.It Fl \-build-tag Ar N
+Optional build tag as specified by
+.Sy PyPA Platform compatibility tags
+(see
+.Sx SEE ALSO ) .
+
+.It Fl \-classifier Ar CLASSIFIER
+Override classifiers from
+.Pa pyproject.toml .
+Multiple
+.Fl \-classifier
+flags are supported.
+
+.It Fl \-conf Ar PATH
+Set path to pyproject configuration file as defined by
+.Sy Project metadata
+(see
+.Sx SEE ALSO ) .
+If not provided, defaults to
+.Pa pyproject.toml .
+
+.It Fl \-data Ar SRC_PATH:DST_PATH
+Additional files added to wheel as part of
+.Pa .data/data
+directory.
+This argument's values are formatted as
+.Sq Ao src-path Ac : Ns Ao dst-path Ac
+where
+.Sq Aq src-path
+is source path of file which should be included as part of wheel, and
+.Sq Aq dst-path
+is path inside wheel's
+.Pa .data/data
+directory where file should be created.
+Multiple
+.Fl \-data
+flags are supported.
+
+.It Fl \-dependency Ar NAME
+Override dependencies from
+.Pa pyproject.toml .
+Multiple
+.Fl \-dependency
+flags are supported.
+
+.It Fl \-description Ar TEXT
+Override description from
+.Pa pyproject.toml .
+
+.It Fl \-gui-script Ar NAME=ENTRY
+Override gui scripts from
+.Pa pyproject.toml .
+Multiple
+.Fl \-gui-script
+flags are supported.
+
+.It Fl \-help
+Print usage help message to
+.Sy stdout
+and exit.
+
+.It Fl \-keyword Ar KEYWORD
+Override keywords from
+.Pa pyproject.toml .
+Multiple
+.Fl \-keyword
+flags are supported.
+
+.It Fl \-license Ar NAME
+Override license from
+.Pa pyproject.toml .
+
+.It Fl \-license-file Ar PATH
+Override license file path from
+.Pa pyproject.toml .
+
+.It Fl \-maintainer Ar NAME
+Override maintainers from
+.Pa pyproject.toml .
+Maintainer's name can be formatted as
+.Qq name
+or
+.Qq name Aq email .
+Multiple
+.Fl \-maintainer
+flags are supported.
+
+.It Fl \-name Ar NAME
+Override name from
+.Pa pyproject.toml .
+
+.It Fl \-not-purelib
+Created wheel is not
+.Sy purelib .
+
+.It Fl \-optional-dependency Ar GROUP:NAME
+Override optional dependencies from
+.Pa pyproject.toml .
+Multiple
+.Fl \-optional-dependency
+flags are supported.
+
+.It Fl \-platform-tag Ar TAG
+Platform tag as specified by
+.Sy PyPA Platform compatibility tags
+(see
+.Sx SEE ALSO ) .
+If not provided, defaults to
+.Em any .
+
+.It Fl \-python-tag Ar TAG
+Python tag as specified by
+.Sy PyPA Platform compatibility tags
+(see
+.Sx SEE ALSO ) .
+If not provided, defaults to
+.Em py3 .
+
+.It Fl \-quiet
+Skip printing wheel name to
+.Sy stdout .
+
+.It Fl \-readme Ar PATH
+Override readme path from
+.Pa pyproject.toml .
+
+.It Fl \-requires-python Ar VERSION
+Override requires python from
+.Pa pyproject.toml .
+
+.It Fl \-script Ar NAME=ENTRY
+Override scripts from
+.Pa pyproject.toml .
+Multiple
+.Fl \-script
+flags are supported.
+
+.It Fl \-skip-conf
+Do not read configuration from
+.Pa pyproject.toml .
+
+.It Fl \-src-dir Ar PATH
+Root directory containing files that should be included as part of wheel.
+If not provided, defaults to
+.Pa \&. .
+
+.It Fl \-src-exclude Ar PATTERN
+Pattern used as
+.Fn pathlib.Path.glob
+argument applied to
+.Fl \-src-dir.
+Files defined by this pattern are not included in wheel, even in case they
+are matching
+.Fl \-src-include
+patterns.
+Multiple
+.Fl \-src-exclude
+flags are supported.
+If not provided, defaults to
+.Pa **/__pycache__/**/* , build/**/* , **/.git/**/* .
+
+.It Fl \-src-include Ar PATTERN
+Pattern used as
+.Fn pathlib.Path.glob
+argument applied to
+.Fl \-src-dir.
+Files defined by this pattern are included in wheel.
+Multiple
+.Fl \-src-include
+flags are supported.
+If not provided, defaults to
+.Pa **/*.py .
+
+.It Fl \-url Ar NAME=URL
+Override urls from
+.Pa pyproject.toml .
+Multiple
+.Fl \-url
+flags are supported.
+
+.It Fl \-version Ar VERSION
+Override version from
+.Pa pyproject.toml .
+
+.El
+
+.Sh FILES
+.Bl -tag
+.It Pa pyproject.toml
+Optional pyproject configuration file searched for in current working
+directory.
+All configuration properties from this file can be overridden with
+command line arguments (including location of
+.Pa pyproject.toml ) .
+
+.Sh EXIT STATUS
+.Ex -std
+
+.Sh SEE ALSO
+.Bl -tag
+.It PyPA Platform compatibility tags
+.Lk https://packaging.python.org/en/latest/specifications/platform-compatibility-tags
+.It PyPA Project metadata
+.Lk https://packaging.python.org/en/latest/specifications/declaring-project-metadata
+.It PyPA Core metadata
+.Lk https://packaging.python.org/en/latest/specifications/core-metadata
+.El
+
+.Sh AUTHORS
+.An Bozo Kopic Aq Mt bozo@kopic.xyz

@@ -35,7 +35,7 @@ def create_wheel(src_dir: Path,
                  editable: bool = False,
                  src_include_patterns: typing.Iterable[str] = ['**/*'],
                  src_exclude_patterns: typing.Iterable[str] = ['**/__pycache__/**/*'],  # NOQA
-                 data_dir: Path | None = None,
+                 data_paths: list[tuple[Path, Path]] = [],
                  build_tag: int | None = None,
                  python_tag: str = 'py3',
                  abi_tag: str = 'none',
@@ -68,6 +68,9 @@ def create_wheel(src_dir: Path,
     resulting wheel. All files specified by exclude patterns will not be
     included in resulting wheel, even if same file is specified by include
     pattern.
+
+    Argument `data_paths` defines list of (source, destination) paths to be
+    included in wheel's data directory.
 
     """
     conf = common.get_conf(conf_path) if conf_path else {}
@@ -147,13 +150,12 @@ def create_wheel(src_dir: Path,
                                     data=src_path.read_bytes())
                 records.append(record)
 
-            if data_dir:
-                for path in _get_data_paths(data_dir):
-                    record = _whl_write(
-                        whl=whl,
-                        path=data_path / 'data' / path.relative_to(data_dir),
-                        data=path.read_bytes())
-                    records.append(record)
+            for src_path, dst_path in data_paths:
+                record = _whl_write(
+                    whl=whl,
+                    path=data_path / 'data' / dst_path,
+                    data=src_path.read_bytes())
+                records.append(record)
 
         if license_path:
             record = _whl_write(whl=whl,
@@ -220,15 +222,6 @@ def _get_src_paths(src_dir: Path,
             continue
 
         yield src_path
-
-
-def _get_data_paths(data_dir: Path
-                    ) -> typing.Iterable[Path]:
-    for data_path in data_dir.glob('**/*'):
-        if data_path.is_dir():
-            continue
-
-        yield data_path
 
 
 def _get_editable_pth(src_dir: Path) -> str:

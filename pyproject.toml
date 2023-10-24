@@ -1,6 +1,6 @@
 [project]
 name = "mkwhl"
-version = "0.2.7"
+version = "0.3.0"
 description = "Python wheel creation utility"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -34,3 +34,6 @@ requires = [
 [tool.mkwhl]
 src-dir = '.'
 src-include-patterns = ["mkwhl/**/*"]
+data-paths = [
+    {src = "man/mkwhl.1", dst = "share/man/man1/mkwhl.1"},
+]

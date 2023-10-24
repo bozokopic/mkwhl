@@ -34,9 +34,13 @@ Requirements
 Install
 -------
 
-::
+PyPI python package::
 
     $ pip install mkwhl
+
+Archlinux AUR::
+
+    $ yay -S mkwhl
 
 
 Command line tool
@@ -47,7 +51,7 @@ Usage::
     $ mkwhl --help
 
 `mkwhl` will create new wheel in ``--build-dir`` (defaults to ``build``)
-containing files from ``--src-dir`` (default to ``.``). Files in ``--src-dir``
+containing files from ``--src-dir`` (defaults to ``.``). Files in ``--src-dir``
 are selected based on ``--src-include`` and ``--src-exclude`` patterns
 used as `pathlib.Path.glob` arguments applied to ``--src-dir``
 (``--src-exclude`` patterns are prioritized over ``--src-include`` patterns).
@@ -55,6 +59,10 @@ If ``--skip-conf`` is not set, project properties, which are not explicitly
 overridden by command line arguments, are read from ``--conf`` (defaults to
 ``pyproject.toml``) as defined by `project metadata`_. When wheel is created,
 wheel name is printed to stdout (unless ``--quiet`` flag is set).
+
+For more information::
+
+    $ man 1 mkwhl
 
 
 `pyproject.toml` build backend
@@ -92,9 +100,10 @@ Wheel will be build based on pyproject.toml `project metadata`_ and additional
   wheel. This patterns take priority over `src-include-patterns`. If not set,
   ``['**/__pycache__/**/*']`` is assumed.
 
-* `data-dir` (string)
+* `data-paths` (list of tables)
 
-  Optional data directory.
+  Optional data paths where list element is table with ``src`` and ``dst``
+  keys referencing source and destination path strings.
 
 * 'python-tag' (string)
 
@@ -156,7 +165,7 @@ exposes single function::
                      editable: bool = False,
                      src_include_patterns: typing.Iterable[str] = ['**/*'],
                      src_exclude_patterns: typing.Iterable[str] = ['**/__pycache__/**/*'],
-                     data_dir: Path | None = None,
+                     data_paths: list[tuple[Path, Path]] = [],
                      build_tag: int | None = None,
                      python_tag: str = 'py3',
                      abi_tag: str = 'none',
@@ -189,6 +198,9 @@ exposes single function::
         resulting wheel. All files specified by exclude patterns will not be
         included in resulting wheel, even if same file is specified by include
         pattern.
+
+        Argument `data_paths` defines list of (source, destination) paths to be
+        included in wheel's data directory.
 
         """
 
