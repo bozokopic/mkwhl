@@ -14,13 +14,13 @@ def get_entry_points_txt(props: common.EntryPointsProps) -> str:
         stream.write("[console_scripts]\n")
 
         for name, path in props.console_scripts.items():
-            stream.write(f"{name} = {path}")
+            stream.write(f"{name} = {path}\n")
 
     if props.gui_scripts:
         stream.write("[gui_scripts]\n")
 
         for name, path in props.gui_scripts.items():
-            stream.write(f"{name} = {path}")
+            stream.write(f"{name} = {path}\n")
 
     return stream.getvalue()
 
