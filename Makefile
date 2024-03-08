@@ -4,7 +4,8 @@
 PYTHON = python3
 
 dist:
-	$(PYTHON) -m mkwhl --data man/mkwhl.1:share/man/man1/mkwhl.1
+	$(PYTHON) -m mkwhl --src-include 'mkwhl/**/*' \
+	                   --data man/mkwhl.1:share/man/man1/mkwhl.1
 
 install:
 	$(PYTHON) -m pip install .
