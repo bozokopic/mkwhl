@@ -1,7 +1,6 @@
 """Build backend implementing PEP517 and PEP660"""
 
 from pathlib import Path
-import collections
 import typing
 
 from mkwhl import common
@@ -40,13 +39,13 @@ def build_sdist(sdist_directory: str,
 def get_requires_for_build_wheel(config_settings: typing.Any = None
                                  ) -> list[str]:
     """Get build wheel requirements (PEP517)"""
-    return _get_requires()
+    return []
 
 
 def get_requires_for_build_editable(config_settings: typing.Any = None
                                     ) -> list[str]:
     """Get build editable wheel requirements (PEP660)"""
-    return _get_requires()
+    return []
 
 
 def _build_wheel(build_dir: Path,
@@ -95,17 +94,3 @@ def _build_wheel(build_dir: Path,
                         abi_tag=abi_tag,
                         platform_tag=platform_tag,
                         is_purelib=is_purelib)
-
-
-def _get_requires() -> list[str]:
-    conf = common.get_conf()
-    project_conf = conf.get('project', {})
-    tool_conf = conf.get('tool', {}).get('mkwhl', {})
-
-    dependencies = collections.deque(project_conf.get('dependencies', []))
-
-    for i in tool_conf.get('optional-dependencies', ['dev']):
-        dependencies.extend(
-            project_conf.get('optional-dependencies', {}).get(i, []))
-
-    return list(dependencies)

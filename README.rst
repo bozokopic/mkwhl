@@ -129,12 +129,6 @@ Wheel will be build based on pyproject.toml `project metadata`_ and additional
   Is purelib (see `binary distribution format`_). If not set, ``true`` is
   assumed.
 
-* `optional-dependencies` (list of strings)
-
-  List of strings used as keys in pyproject.toml
-  ``[project.optional-dependencies]``. These dependencies are required as part
-  of build virtual environment. If not set, ``['dev']`` is assumed.
-
 
 Python API
 ----------
@@ -210,7 +204,7 @@ License
 
 mkwhl - python wheel creation utility
 
-Copyright (C) 2023-2024 Bozo Kopic
+Copyright (C) 2023-2026 Bozo Kopic
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

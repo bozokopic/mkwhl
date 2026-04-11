@@ -18,3 +18,5 @@ check:
 
 clean:
 	rm -rf build
+
+.PHONY: dist install editable check clean
