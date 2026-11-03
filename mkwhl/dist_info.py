@@ -1,7 +1,8 @@
 """Formating of .dist-info files"""
 
+from collections.abc import Iterable
+import csv
 import io
-import typing
 
 from mkwhl import common
 
@@ -29,7 +30,7 @@ def get_METADATA(props: common.MetadataProps) -> str:
     """Create METADATA file content"""
     stream = io.StringIO()
 
-    stream.write("Metadata-Version: 2.1\n")
+    stream.write("Metadata-Version: 2.5\n")
     stream.write(f"Name: {props.name}\n")
     stream.write(f"Version: {props.version}\n")
 
@@ -45,14 +46,8 @@ def get_METADATA(props: common.MetadataProps) -> str:
     if props.description_content_type is not None:
         stream.write(f"Description-Content-Type: {props.description_content_type}\n")  # NOQA
 
-    if props.keywords is not None:
+    if props.keywords:
         stream.write(f"Keywords: {','.join(props.keywords)}\n")
-
-    if props.home_page is not None:
-        stream.write(f"Home-page: {props.home_page}\n")
-
-    if props.download_url is not None:
-        stream.write(f"Download-URL: {props.download_url}\n")
 
     if props.author is not None:
         stream.write(f"Author: {props.author}\n")
@@ -66,14 +61,14 @@ def get_METADATA(props: common.MetadataProps) -> str:
     if props.maintainer_email is not None:
         stream.write(f"Maintainer-email: {props.maintainer_email}\n")
 
-    if props.license is not None:
-        stream.write(f"License: {props.license}\n")
+    if props.license_expression is not None:
+        stream.write(f"License-Expression: {props.license_expression}\n")
+
+    for license_file in props.license_file_paths.keys():
+        stream.write(f"License-File: {license_file}\n")
 
     for classifier in props.classifiers:
         stream.write(f"Classifier: {classifier}\n")
-
-    for provides_extra in props.provides_extras:
-        stream.write(f"Provides-Extra: {provides_extra}\n")
 
     for requires_dist in props.requires_dists:
         stream.write(f"Requires-Dist: {requires_dist}\n")
@@ -86,6 +81,15 @@ def get_METADATA(props: common.MetadataProps) -> str:
 
     for url_name, url_path in props.project_urls.items():
         stream.write(f"Project-URL: {url_name}, {url_path}\n")
+
+    for provides_extra in props.provides_extras:
+        stream.write(f"Provides-Extra: {provides_extra}\n")
+
+    for import_name in props.import_names:
+        stream.write(f"Import-Name: {import_name}\n")
+
+    for import_namespace in props.import_namespaces:
+        stream.write(f"Import-Namespace: {import_namespace}\n")
 
     if props.description_path:
         description = props.description_path.read_text('utf-8')
@@ -113,18 +117,17 @@ def get_WHEEL(props: common.WheelProps) -> str:
     return stream.getvalue()
 
 
-def get_RECORD(records: typing.Iterable[common.WheelRecord]) -> str:
+def get_RECORD(records: Iterable[common.WheelRecord]) -> str:
     """Create RECORD file content"""
     stream = io.StringIO()
+    writer = csv.writer(stream, delimiter=',', quotechar='"')
 
     for record in records:
-        stream.write(f"{record.path},")
-
+        path = record.path.as_posix()
         sha256 = (f"sha256={common.urlsafe_b64encode_nopad(record.sha256)}"
                   if record.sha256 is not None else '')
-        stream.write(f"{sha256},")
-
         size = str(record.size) if record.size is not None else ''
-        stream.write(f"{size}\n")
+
+        writer.writerow([path, sha256, size])
 
     return stream.getvalue()

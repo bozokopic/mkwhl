@@ -6,6 +6,7 @@ from mkwhl.build import (UnsupportedOperation,
                          build_sdist,
                          get_requires_for_build_wheel,
                          get_requires_for_build_editable)
+from mkwhl.common import Person
 from mkwhl.wheel import create_wheel
 
 
@@ -15,4 +16,5 @@ __all__ = ['UnsupportedOperation',
            'build_sdist',
            'get_requires_for_build_wheel',
            'get_requires_for_build_editable',
+           'Person',
            'create_wheel']

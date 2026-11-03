@@ -1,20 +1,19 @@
 [project]
 name = "mkwhl"
-version = "0.3.2"
+version = "0.4.0"
 description = "Python wheel creation utility"
 readme = "README.rst"
 requires-python = ">=3.10"
-license = {text = "GPLv3"}
+license = "GPL-3.0-only"
 dependencies = [
-    "packaging >=23.1",
-    "tomli ~=2.0.1; python_version<'3.11'",
+    "packaging >=24.2",
+    "tomli >=2.0.1; python_version<'3.11'",
 ]
 authors = [
     {name = "Bozo Kopic", email = "bozo@kopic.xyz"}
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+    "Programming Language :: Python :: 3"
 ]
 
 [project.scripts]
@@ -27,8 +26,8 @@ Repository = "https://github.com/bozokopic/mkwhl.git"
 build-backend = "mkwhl"
 backend-path = ["."]
 requires = [
-    "packaging >=23.1",
-    "tomli ~=2.0.1; python_version<'3.11'",
+    "packaging >=24.2",
+    "tomli >=2.0.1; python_version<'3.11'",
 ]
 
 [tool.mkwhl]

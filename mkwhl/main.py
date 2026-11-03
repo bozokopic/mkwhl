@@ -6,6 +6,7 @@ import collections
 import email.utils
 import sys
 
+from mkwhl.common import Person
 from mkwhl.wheel import create_wheel
 
 
@@ -48,10 +49,11 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="override requires python from pyproject.toml")
     parser.add_argument(
         '--license', metavar='NAME', default=None,
-        help="override license identifier from pyproject.toml")
+        help="override SPDX license expression from pyproject.toml")
     parser.add_argument(
-        '--license-file', metavar='PATH', type=Path, default=None,
-        help="override license file path from pyproject.toml")
+        '--license-file', metavar='PATH', action='append',
+        help="override license files from pyproject.toml - "
+             "can be provided multiple times")
     parser.add_argument(
         '--author', metavar='NAME', action='append',
         help="override author from pyproject.toml - "
@@ -108,7 +110,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
         '--data', metavar='SRC_PATH:DST_PATH', action='append',
         help="data source:destination path - can be provided multiple times")
     parser.add_argument(
-        '--build-tag', metavar='N', type=int, default=None,
+        '--build-tag', metavar='TAG', default=None,
         help="optional build tag")
     parser.add_argument(
         '--python-tag', metavar='TAG', default=default_python_tag,
@@ -133,25 +135,13 @@ def main():
     parser = create_argument_parser()
     args = parser.parse_args()
 
-    authors = []
-    for author in (args.author or []):
-        if not author:
-            continue
-        name, mail = email.utils.parseaddr(author)
-        if not name:
-            authors.append((author, None))
-        else:
-            authors.append((name, mail or None))
+    authors = [_parse_person(person)
+               for person in (args.author or [])
+               if person]
 
-    maintainers = []
-    for maintainer in (args.maintainer or []):
-        if not maintainer:
-            continue
-        name, mail = email.utils.parseaddr(maintainer)
-        if not name:
-            maintainers.append((maintainer, None))
-        else:
-            maintainers.append((name, mail or None))
+    maintainers = [_parse_person(person)
+                   for person in (args.maintainer or [])
+                   if person]
 
     urls = {}
     for url in (args.url or []):
@@ -191,7 +181,7 @@ def main():
 
     data_paths = []
     for src_dst_path in (args.data or []):
-        src_path, dst_path = src_dst_path.split(':', 1)
+        src_path, dst_path = src_dst_path.rsplit(':', 1)
         if not src_path or not dst_path:
             continue
         data_paths.append((Path(src_path), Path(dst_path)))
@@ -205,7 +195,7 @@ def main():
         readme_path=args.readme,
         requires_python=args.requires_python,
         license=args.license,
-        license_path=args.license_file,
+        license_paths=[Path(i) for i in (args.license_file or [])] or None,
         authors=authors or None,
         maintainers=maintainers or None,
         keywords=args.keyword or None,
@@ -228,6 +218,17 @@ def main():
 
     if not args.quiet:
         print(wheel_name)
+
+
+def _parse_person(person: str) -> Person:
+    name, mail = email.utils.parseaddr(person)
+
+    if '@' not in mail:
+        return Person(name=person,
+                      email=None)
+
+    return Person(name=name or None,
+                  email=mail)
 
 
 if __name__ == '__main__':

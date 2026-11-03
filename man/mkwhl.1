@@ -1,4 +1,4 @@
-.Dd October 25, 2023
+.Dd November 24, 2026
 .Dt MKWHL 1
 .Os
 
@@ -11,7 +11,7 @@
 .Op Fl \-abi-tag Ar TAG
 .Oo Fl \-author Ar NAME Oc Ns ...
 .Op Fl \-build-dir Ar PATH
-.Op Fl \-build-tag Ar N
+.Op Fl \-build-tag Ar TAG
 .Oo Fl \-classifier Ar CLASSIFIER Oc Ns ...
 .Op Fl \-conf Ar PATH
 .Oo Fl \-data Ar SRC_PATH:DST_PATH Oc Ns ...
@@ -21,7 +21,7 @@
 .Op Fl \-help
 .Oo Fl \-keyword Ar KEYWORD Oc Ns ...
 .Op Fl \-license Ar NAME
-.Op Fl \-license-file Ar PATH
+.Op Fl \-license-file Ar PATH Oc Ns ...
 .Oo Fl \-maintainer Ar NAME Oc Ns ...
 .Op Fl \-name Ar NAME
 .Op Fl \-not-purelib
@@ -108,7 +108,7 @@ Path to directory where new wheel will be created.
 If not provided, defaults to
 .Pa build .
 
-.It Fl \-build-tag Ar N
+.It Fl \-build-tag Ar TAG
 Optional build tag as specified by
 .Sy PyPA Platform compatibility tags
 (see
@@ -177,12 +177,15 @@ Multiple
 flags are supported.
 
 .It Fl \-license Ar NAME
-Override license from
+Override SPDX license expression from
 .Pa pyproject.toml .
 
 .It Fl \-license-file Ar PATH
-Override license file path from
+Override license files from
 .Pa pyproject.toml .
+Multiple
+.Fl \-license-file
+flags are supported.
 
 .It Fl \-maintainer Ar NAME
 Override maintainers from

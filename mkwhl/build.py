@@ -55,7 +55,6 @@ def _build_wheel(build_dir: Path,
     tool_conf = conf.get('tool', {}).get('mkwhl', {})
 
     src_dir = tool_conf.get('src-dir')
-    license_path = tool_conf.get('license-path')
     src_include_patterns = tool_conf.get('src-include-patterns',
                                          ['**/*'])
     src_exclude_patterns = tool_conf.get('src-exclude-patterns',
@@ -73,18 +72,14 @@ def _build_wheel(build_dir: Path,
                 src_dir = i
                 break
         else:
-            raise Exception('cound not detect src dir')
+            raise Exception('could not detect src dir')
     else:
         src_dir = Path(src_dir)
-
-    if license_path is not None:
-        license_path = Path(license_path)
 
     data_paths = [(Path(i['src']), Path(i['dst'])) for i in data_paths]
 
     return create_wheel(src_dir=src_dir,
                         build_dir=build_dir,
-                        license_path=license_path,
                         editable=editable,
                         src_include_patterns=src_include_patterns,
                         src_exclude_patterns=src_exclude_patterns,

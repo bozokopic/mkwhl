@@ -1,11 +1,14 @@
 """Create wheel API"""
 
+from collections.abc import Collection, Iterable
 from pathlib import Path
 import collections
 import hashlib
 import itertools
-import typing
+import stat
 import zipfile
+
+import packaging.utils
 
 from mkwhl import common
 from mkwhl import dist_info
@@ -21,22 +24,22 @@ def create_wheel(src_dir: Path,
                  readme_path: Path | None = None,
                  requires_python: str | None = None,
                  license: str | None = None,
-                 license_path: Path | None = None,
-                 authors: list[tuple[str | None, str | None]] | None = None,
-                 maintainers: list[tuple[str | None, str | None]] | None = None,  # NOQA
-                 keywords: list[str] | None = None,
-                 classifiers: list[str] | None = None,
+                 license_paths: Collection[Path] | None = None,
+                 authors: Collection[common.Person] | None = None,
+                 maintainers: Collection[common.Person] | None = None,
+                 keywords: Collection[str] | None = None,
+                 classifiers: Collection[str] | None = None,
                  urls: dict[str, str] | None = None,
                  scripts: dict[str, str] | None = None,
                  gui_scripts: dict[str, str] | None = None,
-                 dependencies: list[str] | None = None,
-                 optional_dependencies: dict[str, list[str]] | None = None,
+                 dependencies: Collection[str] | None = None,
+                 optional_dependencies: dict[str, Collection[str]] | None = None,  # NOQA
                  conf_path: Path | None = Path('pyproject.toml'),
                  editable: bool = False,
-                 src_include_patterns: typing.Iterable[str] = ['**/*'],
-                 src_exclude_patterns: typing.Iterable[str] = ['**/__pycache__/**/*'],  # NOQA
-                 data_paths: list[tuple[Path, Path]] = [],
-                 build_tag: int | None = None,
+                 src_include_patterns: Iterable[str] = ['**/*'],
+                 src_exclude_patterns: Iterable[str] = ['**/__pycache__/**/*'],
+                 data_paths: Iterable[tuple[Path, Path]] = [],
+                 build_tag: str | None = None,
                  python_tag: str = 'py3',
                  abi_tag: str = 'none',
                  platform_tag: str = 'any',
@@ -50,14 +53,10 @@ def create_wheel(src_dir: Path,
     created.
 
     If one of arguments `name`, `version`, `description`, `readme_path`,
-    `requires_python`, `license`, `authors`, `maintainers`, `keywords`,
-    `classifiers`, `urls`, `scripts`, `gui_scripts`, `dependencies` or
-    `optional_dependencies` is ``None``, associated resulting property is
+    `requires_python`, `license`, `license_paths`, `authors`, `maintainers`,
+    `keywords`, `classifiers`, `urls`, `scripts`, `gui_scripts`, `dependencies`
+    or `optional_dependencies` is ``None``, associated resulting property is
     set based on project configuration read from pyproject.
-
-    Arguments `authors` and `maintainers` are structured as list of tuples
-    where first tuple element represents name and second tuple element
-    represents email.
 
     If `conf_path` is ``None``, resulting wheel will be created based only
     on provided arguments without parsing of pyproject configuration.
@@ -69,7 +68,7 @@ def create_wheel(src_dir: Path,
     included in resulting wheel, even if same file is specified by include
     pattern.
 
-    Argument `data_paths` defines list of (source, destination) paths to be
+    Argument `data_paths` defines iterable of (source, destination) paths to be
     included in wheel's data directory.
 
     """
@@ -91,6 +90,7 @@ def create_wheel(src_dir: Path,
         readme_path=readme_path,
         requires_python=requires_python,
         license=license,
+        license_paths=license_paths,
         authors=authors,
         maintainers=maintainers,
         keywords=keywords,
@@ -105,110 +105,126 @@ def create_wheel(src_dir: Path,
                                         platform_tag=platform_tag,
                                         is_purelib=is_purelib)
 
-    if license_path is None and project:
-        license_path_str = project.conf.get('license', {}).get('file')
-        if license_path_str:
-            license_path = project.path / license_path_str
-    if license_path is None:
-        for i in [Path('LICENSE'), Path('LICENSE.txt')]:
-            if i.exists():
-                license_path = i
-                break
+    wheel_name = _get_wheel_name(name=metadata_props.name,
+                                 version=metadata_props.version,
+                                 build_tag=build_tag,
+                                 python_tag=python_tag,
+                                 abi_tag=abi_tag,
+                                 platform_tag=platform_tag)
 
-    wheel_name = common.get_wheel_name(name=metadata_props.name,
-                                       version=metadata_props.version,
-                                       build_tag=build_tag,
-                                       python_tag=python_tag,
-                                       abi_tag=abi_tag,
-                                       platform_tag=platform_tag)
     wheel_path = build_dir / wheel_name
+    tmp_wheel_path = build_dir / f'{wheel_name}.tmp'
 
-    dist_info_name = common.get_dist_info_name(name=metadata_props.name,
-                                               version=metadata_props.version)
+    dist_info_name = _get_dist_info_name(name=metadata_props.name,
+                                         version=metadata_props.version)
     dist_info_path = Path(dist_info_name)
 
-    data_name = common.get_data_name(name=metadata_props.name,
-                                     version=metadata_props.version)
+    data_name = _get_data_name(name=metadata_props.name,
+                               version=metadata_props.version)
     data_path = Path(data_name)
 
     records = collections.deque()
-    wheel_path.parent.mkdir(parents=True,
-                            exist_ok=True)
-    with zipfile.ZipFile(wheel_path, "w", zipfile.ZIP_DEFLATED) as whl:
-        if editable:
-            data = _get_editable_pth(src_dir)
-            record = _whl_write(whl=whl,
-                                path=Path(f'{metadata_props.name}.pth'),
-                                data=data.encode('utf-8'))
-            records.append(record)
+    build_dir.mkdir(parents=True,
+                    exist_ok=True)
 
-        else:
-            for src_path in _get_src_paths(src_dir, src_include_patterns,
-                                           src_exclude_patterns):
+    try:
+        with zipfile.ZipFile(tmp_wheel_path, "w", zipfile.ZIP_DEFLATED) as whl:
+            if editable:
+                data = _get_editable_pth(src_dir)
                 record = _whl_write(whl=whl,
-                                    path=src_path.relative_to(src_dir),
-                                    data=src_path.read_bytes())
+                                    path=Path(f'{metadata_props.name}.pth'),
+                                    data=data.encode('utf-8'))
                 records.append(record)
 
-            for src_path, dst_path in data_paths:
+            else:
+                for src_path in sorted(_get_src_paths(src_dir,
+                                                      src_include_patterns,
+                                                      src_exclude_patterns)):
+                    record = _whl_write(whl=whl,
+                                        path=src_path.relative_to(src_dir),
+                                        data=src_path)
+                    records.append(record)
+
+                for src_path, dst_path in sorted(data_paths):
+                    record = _whl_write(
+                        whl=whl,
+                        path=data_path / 'data' / dst_path,
+                        data=src_path)
+                    records.append(record)
+
+            license_file_paths = metadata_props.license_file_paths
+            for license_file, license_path in license_file_paths.items():
                 record = _whl_write(
                     whl=whl,
-                    path=data_path / 'data' / dst_path,
-                    data=src_path.read_bytes())
+                    path=dist_info_path / 'licenses' / license_file,
+                    data=license_path)
                 records.append(record)
 
-        if license_path:
-            record = _whl_write(whl=whl,
-                                path=dist_info_path / license_path.name,
-                                data=license_path.read_bytes())
-            records.append(record)
+            data = dist_info.get_entry_points_txt(entry_points_props)
+            if data:
+                record = _whl_write(whl=whl,
+                                    path=dist_info_path / 'entry_points.txt',
+                                    data=data.encode('utf-8'))
+                records.append(record)
 
-        data = dist_info.get_entry_points_txt(entry_points_props)
-        if data:
+            data = dist_info.get_METADATA(metadata_props)
             record = _whl_write(whl=whl,
-                                path=dist_info_path / 'entry_points.txt',
+                                path=dist_info_path / 'METADATA',
                                 data=data.encode('utf-8'))
             records.append(record)
 
-        data = dist_info.get_METADATA(metadata_props)
-        record = _whl_write(whl=whl,
-                            path=dist_info_path / 'METADATA',
-                            data=data.encode('utf-8'))
-        records.append(record)
+            data = dist_info.get_WHEEL(wheel_props)
+            record = _whl_write(whl=whl,
+                                path=dist_info_path / 'WHEEL',
+                                data=data.encode('utf-8'))
+            records.append(record)
 
-        data = dist_info.get_WHEEL(wheel_props)
-        record = _whl_write(whl=whl,
-                            path=dist_info_path / 'WHEEL',
-                            data=data.encode('utf-8'))
-        records.append(record)
+            record = common.WheelRecord(path=dist_info_path / 'RECORD',
+                                        sha256=None,
+                                        size=None)
+            records.append(record)
+            data = dist_info.get_RECORD(records)
+            _whl_write(whl=whl,
+                       path=record.path,
+                       data=data.encode('utf-8'))
 
-        record = common.WheelRecord(path=dist_info_path / 'RECORD',
-                                    sha256=None,
-                                    size=None)
-        records.append(record)
-        data = dist_info.get_RECORD(records)
-        _whl_write(whl=whl,
-                   path=record.path,
-                   data=data.encode('utf-8'))
+        tmp_wheel_path.replace(wheel_path)
+
+    finally:
+        tmp_wheel_path.unlink(missing_ok=True)
 
     return wheel_name
 
 
 def _whl_write(whl: zipfile.ZipFile,
                path: Path,
-               data: bytes
+               data: Path | bytes
                ) -> common.WheelRecord:
+    if isinstance(data, Path):
+        mode = 0o755 if data.stat().st_mode & 0o111 else 0o644
+        data = data.read_bytes()
+
+    else:
+        mode = 0o644
+
     record = common.WheelRecord(path=path,
                                 sha256=hashlib.sha256(data).digest(),
                                 size=len(data))
-    whl.writestr(str(record.path), data)
+
+    info = zipfile.ZipInfo(path.as_posix())
+    info.create_system = 3
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.external_attr = (stat.S_IFREG | mode) << 16
+
+    whl.writestr(info, data)
+
     return record
 
 
 def _get_src_paths(src_dir: Path,
-                   src_include_patterns: typing.Iterable[str],
-                   src_exclude_patterns: typing.Iterable[str]
-                   ) -> typing.Iterable[Path]:
+                   src_include_patterns: Iterable[str],
+                   src_exclude_patterns: Iterable[str]
+                   ) -> Iterable[Path]:
     src_include_paths = set(itertools.chain.from_iterable(
         src_dir.glob(pattern) for pattern in src_include_patterns))
     src_exclude_paths = set(itertools.chain.from_iterable(
@@ -225,8 +241,32 @@ def _get_src_paths(src_dir: Path,
 
 
 def _get_editable_pth(src_dir: Path) -> str:
-    src_dir_repr = repr(str(src_dir.resolve()))
+    return f'{src_dir.resolve()}\n'
 
-    return (f"import sys; "
-            f"sys.path = [{src_dir_repr}, "
-            f"*(i for i in sys.path if i != {src_dir_repr})]\n")
+
+def _get_wheel_name(name: packaging.utils.NormalizedName,
+                    version: str,
+                    build_tag: str | None,
+                    python_tag: str,
+                    abi_tag: str,
+                    platform_tag: str
+                    ) -> str:
+    wheel_name = f"{name.replace('-', '_')}-{version}"
+
+    if build_tag is not None:
+        wheel_name += f"-{build_tag}"
+
+    wheel_name += f"-{python_tag}-{abi_tag}-{platform_tag}.whl"
+    return wheel_name
+
+
+def _get_dist_info_name(name: packaging.utils.NormalizedName,
+                        version: str
+                        ) -> str:
+    return f"{name.replace('-', '_')}-{version}.dist-info"
+
+
+def _get_data_name(name: packaging.utils.NormalizedName,
+                   version: str
+                   ) -> str:
+    return f"{name.replace('-', '_')}-{version}.data"
